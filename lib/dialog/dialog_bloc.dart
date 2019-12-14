@@ -2,60 +2,77 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_app/app_provider.dart';
+
 
 class DialogBloc {
 
-  List<DialogViewState> states;
-  StreamController<List<DialogViewState>> dialogStateController;
-  Stream<List<DialogViewState>> get dialogStatesStream => dialogStateController.stream;
-  Sink<List<DialogViewState>> get dialogStatesSink => dialogStateController.sink;
-
-
+  List<DialogStateController> controllers;
+  StreamController _streamController;
 
   DialogBloc(){
-    dialogStateController = StreamController<List<DialogViewState>>.broadcast();
-    states = [];
-    dialogStateController.add([]);
+    controllers = [];
   }
 
-  void dispose() {
-    dialogStateController.close();
-  }
-
-  void showDialog({DialogInterface interface}) async {
-    states.add(DialogViewState(interface: interface));
-    dialogStatesSink.add(states);
+  void showDialog({BaseDialog dialog}) async {
+    if(controllers.length > 0) {
+      controllers.last.state = DialogState.hide;
+    }
+    controllers.add(DialogStateController(dialog: dialog));
   }
 
   void popDialog() async {
-    if(states.length == 0)return;
-    states.last.isShow = false;
-    dialogStatesSink.add(states);
+    if(controllers.length == 0) return;
+
+    controllers.last.state = DialogState.dismiss;
+    if( controllers.length >= 2) {
+      controllers[controllers.length - 2].state = DialogState.show;
+    }
   }
 
-  void inspectDialogStates() async {
-    states = states.where((state)=> state.isShow).toList();
-    dialogStatesSink.add(states);
+  void inspectDialogs() async {
+    // remove last stats
+    controllers = controllers.where((dialog)=> dialog.state != DialogState.dismiss).toList();
   }
 }
 
-class DialogInterface {
+
+class BaseDialog {
   Widget child;
   Function outSideTapped;
+  DialogType type;
 
-  DialogInterface({
-    @required this.child,
-    this.outSideTapped
+
+  BaseDialog({
+    this.child,
+    this.outSideTapped,
+    this.type = DialogType.center
   });
+}
+
+
+class DialogStateController {
+  BaseDialog dialog;
+  DialogState state = DialogState.show;
+
+  DialogStateController({
+    @required this.dialog,
+  });
+
+  bool get isShow {
+    return state == DialogState.show;
+  }
 
 }
 
-class DialogViewState {
-  DialogInterface interface;
-  bool isShow = true;
+enum DialogType {
+  center,
+  modal,
+}
 
-  DialogViewState({
-    @required this.interface,
-  });
 
+enum DialogState {
+  show,
+  hide,
+  dismiss,
 }

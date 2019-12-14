@@ -1,8 +1,10 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_app/dialog/dialog_bloc.dart';
+import 'package:flutter_app/dialog/dialog_screen.dart';
 
 class AppProvider extends StatefulWidget {
+
   final Widget child;
   DialogBloc dialogBloc;
 
@@ -17,16 +19,22 @@ class AppProvider extends StatefulWidget {
     return context.inheritFromWidgetOfExactType(_AppProvider);
   }
 
-  static void showDialog({BuildContext context, DialogInterface interface}) {
-    _AppProvider provider =  context.inheritFromWidgetOfExactType(_AppProvider);
-    DialogBloc bloc = provider.dialogBloc;
-    bloc.showDialog(interface: interface);
+
+  static void showDialog({BuildContext context,BaseDialog dialog}) {
+    final AppProviderState result = context.ancestorStateOfType(const TypeMatcher<AppProviderState>());
+    result.showDialog(dialog);
+
   }
 
   static void popDialog({BuildContext context}) {
-    (context.inheritFromWidgetOfExactType(_AppProvider) as _AppProvider).dialogBloc.popDialog();
+    final AppProviderState result = context.ancestorStateOfType(const TypeMatcher<AppProviderState>());
+    result.popDialog();
   }
 
+  static void inspectDialog({BuildContext context}) {
+    final AppProviderState result = context.ancestorStateOfType(const TypeMatcher<AppProviderState>());
+    result.insepectDialog();
+  }
 
 
   @override
@@ -40,11 +48,42 @@ class AppProvider extends StatefulWidget {
 class AppProviderState extends State<AppProvider> {
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  void showDialog(BaseDialog dialog) {
+    setState(() {
+      widget.dialogBloc.showDialog(dialog: dialog);
+    });
+  }
+
+  void popDialog(){
+    setState(() {
+      widget.dialogBloc.popDialog();
+    });
+  }
+
+  void insepectDialog(){
+    setState(() {
+      widget.dialogBloc.inspectDialogs();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return _AppProvider(
       key: widget.key,
-      child: widget.child,
+      child:  Stack(
+        children: <Widget>[
+
+          widget.child,
+          DialogScreen(
+            dialogBloc: widget.dialogBloc,
+          )
+        ],
+      ),
       dialogBloc: widget.dialogBloc,
     );
   }
