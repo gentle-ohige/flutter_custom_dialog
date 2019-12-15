@@ -32,7 +32,11 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+
 class _MyHomePageState extends State<MyHomePage> {
+
+
+  GlobalKey screenKey = GlobalKey();
   @override
   void initState() {
     super.initState();
@@ -42,216 +46,138 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
+
         Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Scaffold(
-              backgroundColor: Colors.yellow,
-              body: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      FlatButton(
-                        onPressed: () {
-                          showScreenDialog();
-                        },
-                        child: Text('Show Dialog',
-                            style: TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blueAccent)),
-                      ),
-                    ],
-                  )
-              ),
-            )
-        )
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child:
+          RepaintBoundary(
+              key: screenKey,
+              child:Scaffold(
+
+                backgroundColor: Colors.yellow,
+                body:  Center(
+                    child:Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        FlatButton(
+                          onPressed: (){
+                            showScreenDialog();
+                          },
+                          child: Text(
+                              'Show Dialog',
+                              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.blueAccent)
+                          ),
+
+                        ),
+                      ],
+                    )
+                ),
+              )
+          )
+        ),
       ],
     );
   }
 
-  void showScreenDialog() {
+  Widget showScreenDialog() {
     AppProvider.showDialog(
         context,
         BaseDialog(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              DialogContentsWarp(
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height * 1 / 2,
+                    child:  FutureBuilder<Uint8List>(
+                    future: ScreenShot.screenCapture(screenKey),
+                    builder: (context, snapshot){
+                      if(!snapshot.hasData) {
+                        return Center(
+                          child: Container(
+                            height: 64,
+                            width: 64,
+                            child: CircularProgressIndicator()
+                          ),
+                        );
+                      }
+                      return  Image.memory(snapshot.data);
+                    },
+                  )
+                )
+              ),
+              SizedBox(
+                height: 24,
+              ),
+              DialogButton(
+                isTopCornerRound: true,
+                 txt: "ShowModal",
+                  onPressed: (){
+                    showBottomModal();
+                  },
+              ),
+              SizedBox(
+                height: 2,
+              ),
+              DialogButton(
+                isBottomCornerRound: true,
+                txt: "Close",
+                onPressed: (){
+                  AppProvider.popDialog(context);
+                },
+              ),
+            ],
+          )
+        )
+    );
+  }
+
+  Widget showBottomModal() {
+    AppProvider.showDialog(
+        context,
+        BaseDialog(
+            type: DialogType.bottom,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                DialogContentsWarp(
-                    child: Center(
-                      child: Text(
-                        "Hello World \n No Border",
-                        style: Theme.of(context).textTheme.title,
-                      ),
-                    )),
+                DialogButton(
+                  isTopCornerRound: true,
+                  txt: "Button01",
+                  onPressed: (){
+
+                  },
+                ),
                 SizedBox(
-                  height: 24,
+                  height: 2,
                 ),
                 DialogButton(
-                  isBottomCornerRound: true,
-                  isTopCornerRound: true,
+                  txt: "Button01",
+                  onPressed: (){
+
+                  },
+                ),
+                SizedBox(
+                  height: 2,
+                ),
+                DialogButton(
                   txt: "Close",
-                  onPressed: () {
+                  onPressed: (){
                     AppProvider.popDialog(context);
                   },
                 ),
+                Container(
+                  height: 24,
+                  color: Colors.black12,
+                )
               ],
             )
         )
     );
   }
 }
-
-//
-//
-//class _MyHomePageState extends State<MyHomePage> {
-//
-//
-//  GlobalKey screenKey = GlobalKey();
-//  @override
-//  void initState() {
-//    super.initState();
-//  }
-//
-//  @override
-//  Widget build(BuildContext context) {
-//    return Stack(
-//      children: <Widget>[
-//
-//        Positioned(
-//          top: 0,
-//          left: 0,
-//          right: 0,
-//          bottom: 0,
-//          child:
-//          RepaintBoundary(
-//              key: screenKey,
-//              child:Scaffold(
-//
-//                backgroundColor: Colors.yellow,
-//                body:  Center(
-//                    child:Column(
-//                      mainAxisAlignment: MainAxisAlignment.center,
-//                      children: <Widget>[
-//                        FlatButton(
-//                          onPressed: (){
-//                            showScreenDialog();
-//                          },
-//                          child: Text(
-//                              'Show Dialog',
-//                              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.blueAccent)
-//                          ),
-//
-//                        ),
-//                      ],
-//                    )
-//                ),
-//              )
-//          )
-//        ),
-//      ],
-//    );
-//  }
-//
-//  Widget showScreenDialog() {
-//    AppProvider.showDialog(
-//        context,
-//        BaseDialog(
-//          child: Column(
-//            mainAxisSize: MainAxisSize.min,
-//            mainAxisAlignment: MainAxisAlignment.start,
-//            children: <Widget>[
-//              DialogContentsWarp(
-//                  child: Container(
-//                    width: MediaQuery.of(context).size.width,
-//                    height: MediaQuery.of(context).size.height * 1 / 2,
-//                    child:  FutureBuilder<Uint8List>(
-//                    future: ScreenShot.screenCapture(screenKey),
-//                    builder: (context, snapshot){
-//                      if(!snapshot.hasData) {
-//                        return Center(
-//                          child: Container(
-//                            height: 64,
-//                            width: 64,
-//                            child: CircularProgressIndicator()
-//                          ),
-//                        );
-//                      }
-//                      return  Image.memory(snapshot.data);
-//                    },
-//                  )
-//                )
-//              ),
-//              SizedBox(
-//                height: 24,
-//              ),
-//              DialogButton(
-//                isTopCornerRound: true,
-//                 txt: "ShowModal",
-//                  onPressed: (){
-//                    showBottomModal();
-//                  },
-//              ),
-//              SizedBox(
-//                height: 2,
-//              ),
-//              DialogButton(
-//                isBottomCornerRound: true,
-//                txt: "Close",
-//                onPressed: (){
-//                  AppProvider.popDialog(context);
-//                },
-//              ),
-//            ],
-//          )
-//        )
-//    );
-//  }
-//
-//  Widget showBottomModal() {
-//    AppProvider.showDialog(
-//        context,
-//        BaseDialog(
-//            type: DialogType.bottom,
-//            child: Column(
-//              mainAxisSize: MainAxisSize.min,
-//              mainAxisAlignment: MainAxisAlignment.start,
-//              children: <Widget>[
-//                DialogButton(
-//                  isTopCornerRound: true,
-//                  txt: "Button01",
-//                  onPressed: (){
-//
-//                  },
-//                ),
-//                SizedBox(
-//                  height: 2,
-//                ),
-//                DialogButton(
-//                  txt: "Button01",
-//                  onPressed: (){
-//
-//                  },
-//                ),
-//                SizedBox(
-//                  height: 2,
-//                ),
-//                DialogButton(
-//                  txt: "Close",
-//                  onPressed: (){
-//                    AppProvider.popDialog(context);
-//                  },
-//                ),
-//                Container(
-//                  height: 24,
-//                  color: Colors.black12,
-//                )
-//              ],
-//            )
-//        )
-//    );
-//  }
-//}
