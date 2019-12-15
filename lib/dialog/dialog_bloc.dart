@@ -8,10 +8,14 @@ import 'package:flutter_app/app_provider.dart';
 class DialogBloc {
 
   List<DialogStateController> controllers;
-  StreamController _streamController;
+  StreamController<List<DialogStateController>> statesStreamController;
+  Stream get statesStream => statesStreamController.stream;
+  Sink get statesSink => statesStreamController.sink;
 
   DialogBloc(){
     controllers = [];
+    statesStreamController = StreamController<List<DialogStateController>>();
+    statesSink.add(controllers);
   }
 
   void showDialog({BaseDialog dialog}) async {
@@ -19,6 +23,7 @@ class DialogBloc {
       controllers.last.state = DialogState.hide;
     }
     controllers.add(DialogStateController(dialog: dialog));
+    statesSink.add(controllers);
   }
 
   void popDialog() async {
@@ -28,28 +33,22 @@ class DialogBloc {
     if( controllers.length >= 2) {
       controllers[controllers.length - 2].state = DialogState.show;
     }
+    statesSink.add(controllers);
   }
 
   void inspectDialogs() async {
-    // remove last stats
     controllers = controllers.where((dialog)=> dialog.state != DialogState.dismiss).toList();
+    statesSink.add(controllers);
   }
+
 }
 
 
-class BaseDialog {
-  Widget child;
-  Function outSideTapped;
-  DialogType type;
-
-
-  BaseDialog({
-    this.child,
-    this.outSideTapped,
-    this.type = DialogType.center
-  });
+enum DialogState {
+  show,
+  hide,
+  dismiss,
 }
-
 
 class DialogStateController {
   BaseDialog dialog;
@@ -62,17 +61,23 @@ class DialogStateController {
   bool get isShow {
     return state == DialogState.show;
   }
-
 }
+
 
 enum DialogType {
   center,
-  modal,
+  bottom,
 }
 
+class BaseDialog {
+  Widget child;
+  Function outSideTapped;
+  DialogType type;
 
-enum DialogState {
-  show,
-  hide,
-  dismiss,
+  BaseDialog({
+    this.child,
+    this.outSideTapped,
+    this.type = DialogType.center
+  });
 }
+

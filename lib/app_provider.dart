@@ -6,6 +6,8 @@ import 'package:flutter_app/dialog/dialog_screen.dart';
 class AppProvider extends StatefulWidget {
 
   final Widget child;
+
+  //
   DialogBloc dialogBloc;
 
   AppProvider({
@@ -19,23 +21,17 @@ class AppProvider extends StatefulWidget {
     return context.inheritFromWidgetOfExactType(_AppProvider);
   }
 
-
-  static void showDialog({BuildContext context,BaseDialog dialog}) {
-    final AppProviderState result = context.ancestorStateOfType(const TypeMatcher<AppProviderState>());
-    result.showDialog(dialog);
-
+  static void showDialog(BuildContext context,BaseDialog dialog) {
+    AppProvider.of(context).dialogBloc.showDialog(dialog: dialog);
   }
 
-  static void popDialog({BuildContext context}) {
-    final AppProviderState result = context.ancestorStateOfType(const TypeMatcher<AppProviderState>());
-    result.popDialog();
+  static void popDialog(BuildContext context) {
+    AppProvider.of(context).dialogBloc.popDialog();
   }
 
-  static void inspectDialog({BuildContext context}) {
-    final AppProviderState result = context.ancestorStateOfType(const TypeMatcher<AppProviderState>());
-    result.insepectDialog();
+  static void inspectDialog(BuildContext context) {
+    AppProvider.of(context).dialogBloc.inspectDialogs();
   }
-
 
   @override
   State<StatefulWidget> createState() {
@@ -52,42 +48,15 @@ class AppProviderState extends State<AppProvider> {
     super.initState();
   }
 
-  void showDialog(BaseDialog dialog) {
-    setState(() {
-      widget.dialogBloc.showDialog(dialog: dialog);
-    });
-  }
-
-  void popDialog(){
-    setState(() {
-      widget.dialogBloc.popDialog();
-    });
-  }
-
-  void insepectDialog(){
-    setState(() {
-      widget.dialogBloc.inspectDialogs();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return _AppProvider(
       key: widget.key,
-      child:  Stack(
-        children: <Widget>[
-
-          widget.child,
-          DialogScreen(
-            dialogBloc: widget.dialogBloc,
-          )
-        ],
-      ),
+      child: widget.child,
       dialogBloc: widget.dialogBloc,
     );
   }
-
 }
 
 class _AppProvider extends InheritedWidget {

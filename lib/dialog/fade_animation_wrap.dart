@@ -5,7 +5,7 @@ class FadeAnimationWrap extends StatefulWidget {
 
   final Duration duration;
   final Curve animationCurve;
-  final bool isExpanded;
+  final bool isShow;
 
   final Function(AnimationStatus) animateStateListener;
   final Widget child;
@@ -13,7 +13,7 @@ class FadeAnimationWrap extends StatefulWidget {
   FadeAnimationWrap({
     this.duration = const Duration(milliseconds: 400),
     this.animationCurve = Curves.ease,
-    this.isExpanded = true,
+    this.isShow = true,
     this.child,
     this.animateStateListener
   });
@@ -41,7 +41,7 @@ class _FadeAnimationWrap extends State<FadeAnimationWrap> with TickerProviderSta
     _expandAnimation = _controller.drive(CurveTween(curve: widget.animationCurve));
     if( widget.animateStateListener != null)
       _expandAnimation.addStatusListener(widget.animateStateListener);
-    if(widget.isExpanded){
+    if(widget.isShow){
       _controller.value = 0;
       _controller.forward();
     }
@@ -50,8 +50,8 @@ class _FadeAnimationWrap extends State<FadeAnimationWrap> with TickerProviderSta
   @override
   void didUpdateWidget(FadeAnimationWrap oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if(oldWidget.isExpanded != widget.isExpanded) {
-      if (widget.isExpanded) {
+    if(oldWidget.isShow != widget.isShow) {
+      if (widget.isShow) {
         _controller.forward();
       }
       else {
@@ -65,15 +65,18 @@ class _FadeAnimationWrap extends State<FadeAnimationWrap> with TickerProviderSta
 
     // TODO: implement build
     return FadeTransition(
-      opacity: _expandAnimation,
-      child: widget.child,
+        opacity: _expandAnimation,
+        child: IgnorePointer(
+          ignoring: !widget.isShow,
+          child: widget.child,
+        )
     );
   }
 
   @override
   void dispose() {
-    super.dispose();
     _controller.dispose();
+    super.dispose();
   }
 
 }

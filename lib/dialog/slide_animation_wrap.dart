@@ -5,15 +5,14 @@ class SlideAnimationWrap extends StatefulWidget {
 
   final Duration duration;
   final Curve animationCurve;
-  final bool isExpanded;
-
+  final bool isShow;
   final Function(AnimationStatus) animateStateListener;
   final Widget child;
 
   SlideAnimationWrap({
     this.duration = const Duration(milliseconds: 400),
     this.animationCurve = Curves.ease,
-    this.isExpanded = true,
+    this.isShow = true,
     this.child,
     this.animateStateListener
   });
@@ -42,23 +41,24 @@ class _SlideAnimationWrap extends State<SlideAnimationWrap> with TickerProviderS
     _expandAnimation = _controller
         .drive(CurveTween(curve: Curves.easeInOut))
         .drive(Tween<Offset>(
-        begin:const Offset(2, 0),
+        begin:const Offset(0, 2),
         end: const Offset(0, 0)));
 
     if( widget.animateStateListener != null)
       _expandAnimation.addStatusListener(widget.animateStateListener);
 
-    if(widget.isExpanded){
+    if(widget.isShow){
       _controller.value = 0;
       _controller.forward();
     }
   }
 
+
   @override
   void didUpdateWidget(SlideAnimationWrap oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if(oldWidget.isExpanded != widget.isExpanded) {
-      if (widget.isExpanded) {
+    if(oldWidget.isShow != widget.isShow) {
+      if (widget.isShow) {
         _controller.forward();
       }
       else {
@@ -73,14 +73,17 @@ class _SlideAnimationWrap extends State<SlideAnimationWrap> with TickerProviderS
     // TODO: implement build
     return SlideTransition(
       position: _expandAnimation,
-      child: widget.child,
+      child: IgnorePointer(
+        ignoring: !widget.isShow,
+        child: widget.child,
+      )
     );
   }
 
   @override
   void dispose() {
-    super.dispose();
     _controller.dispose();
+    super.dispose();
   }
 
 }
